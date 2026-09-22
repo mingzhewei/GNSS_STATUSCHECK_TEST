@@ -1,0 +1,6 @@
+﻿event_id,file,event,gps_week,gps_tow_s,time_basis,major,detail
+1,0703002-0918-15-32-gnss_raw.txt,首次定位类型NONE,2436,458093.500,锚点回推,否,UG016表4-2：未解算；#SVs=0，#solnSVs=0。
+2,0703002-0918-15-32-gnss_raw.txt,首次解算状态INSUFFICIENT_OBS,2436,458093.500,锚点回推,否,UG016表4-1：观测量不足。
+3,0703002-0918-15-32-gnss_raw.txt,首个非UNKNOWN时间状态：COARSE,2436,458587.300,GPS标准时间,是,UG016 2.1.2.1标准ASCII头字段6；其后的UNKNOWN样本按锚点回推。
+4,0703002-0918-15-32-gnss_raw.txt,首次时间状态COARSE,2436,458587.300,GPS标准时间,否,UG016 2.1.2.1标准ASCII头字段6。
+5,0703002-0918-15-32-gnss_raw.txt,首次解算状态VARIANCE,2436,458587.300,GPS标准时间,否,UG016表4-1：方差超过限值。

@@ -1,0 +1,7 @@
+﻿event_id,file,event,gps_week,gps_tow_s,time_basis,major,detail
+1,0703002-0918-15-42-gnss_raw.txt,首个非UNKNOWN时间状态：FINESTEERING,2436,459453.200,GPS标准时间,是,UG016 2.1.2.1标准ASCII头字段6；其后的UNKNOWN样本按锚点回推。
+2,0703002-0918-15-42-gnss_raw.txt,首次SOL_COMPUTED,2436,459453.200,GPS标准时间,是,UG016表4-1：完全解算。
+3,0703002-0918-15-42-gnss_raw.txt,首次定位类型SINGLE,2436,459453.200,GPS标准时间,是,UG016表4-2：单点解；#SVs=26，#solnSVs=15。
+4,0703002-0918-15-42-gnss_raw.txt,首次时间状态FINESTEERING,2436,459453.200,GPS标准时间,是,UG016 2.1.2.1标准ASCII头字段6。
+5,0703002-0918-15-42-gnss_raw.txt,首次解算卫星数>0（#solnSVs=15）,2436,459453.200,GPS标准时间,是,UG016 4.2.2字段16 #solnSVs。
+6,0703002-0918-15-42-gnss_raw.txt,首次定位类型NONE,2436,459783.500,GPS标准时间,否,UG016表4-2：未解算；#SVs=20，#solnSVs=0。
