@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """多文件室内→室外冷启动分析 HMI。"""
 from __future__ import annotations
 import json
@@ -46,7 +46,7 @@ class App:
         self.time_mode=tk.StringVar(value="per_file")
         ttk.Label(top,text="多选=每个文件独立生成一份报告；冷启动分析已合并到同一份报告").pack(side="left",padx=12)
 
-
+        ttk.Button(top,text="开始分析并生成报告",command=self.run).pack(side="right",padx=6)
         ttk.Button(top,text="打开报告目录",command=self.open_report_root).pack(side="right",padx=6)
 
         columns=("file","size_mb","best","gsv_batch","ins")

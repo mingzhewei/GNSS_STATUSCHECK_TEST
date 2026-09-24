@@ -1,4 +1,4 @@
-﻿# UG016 GNSS 状态检查分析范式（2026-09-22）
+# UG016 GNSS 状态检查分析范式（2026-09-22）
 
 ## 固定分析口径
 
@@ -42,7 +42,7 @@
 - 基站ID和Diff_age存在只能说明接收机记录到差分数据龄期，不能证明RTK模糊度可用。
 - `KSXT` 可用于交叉验证定位状态、参与解算卫星数、差分龄期和基准站卫星数。
 
-## 本项目三份数据的关键结论
+## 本项目数据的关键结论
 
 ### 0703002-0918-11-09
 
@@ -83,11 +83,25 @@
 - Diff_age：0~3.8 s，中位 1.4 s，无>5s
 - 无 PSRDIFF / 浮点 / 固定
 
+### gnss_raw（新增示例数据）
+
+- 样本：10051
+- 时间状态：FINESTEERING 9877 条，FREEWHEELING 174 条
+- Pos Type：NARROW_FLOAT 7767 条，NARROW_INT 1944 条，NONE 177 条，SINGLE 119 条，PSRDIFF 44 条
+- Sol Type：SOL_COMPUTED 9874 条，VARIANCE 176 条，RESIDUALS 1 条
+- `#SVs`：20~35
+- `#solnSVs`：0~31
+- 基站ID：1314（9874 条），空（177 条）
+- Diff_age：0.0~15.7 s，中位 1.3 s，139 条>2s，107 条>5s，57 条>10s
+- GSV批次：5025；有SNR卫星数 1~14；SNR≥35dB-Hz 卫星数 0~12
+- INS状态：INS_ALIGNMENT_COMPLETE 6110 条，INS_SOLUTION_GOOD 3941 条
+- 这是目前唯一出现 NARROW_FLOAT / NARROW_INT 的示例数据，说明 RTK 浮点/固定解曾出现，但 Diff_age 存在较多次>5s 甚至>10s，需关注差分链路稳定性。
+
 ## 工程判断
 
 - `11-09` 和 `15-42` 有基站ID、非零Diff_age和可用单点解，但始终未进入差分或RTK解，优先排查基站改正内容、RTK配置/授权、RTCM消息类型与频点匹配、基准站坐标/天线信息。
 - `15-32` 失败发生在更早阶段：时间未完全恢复、卫星跟踪弱、无有效基站ID、无参与解算卫星。
-- 三份日志都没有 RTK浮点或固定证据。
+- `gnss_raw` 出现 NARROW_FLOAT / NARROW_INT，说明 RTK 模糊度曾一度固定，但 Diff_age 多次超过 5s/10s，差分链路不稳定是主要怀疑方向。
 - 当前日志无 GSA/GST/DOP/TRACKSTAT，不能量化几何因子或逐通道锁定质量。
 
 ## 本次最终代码入口

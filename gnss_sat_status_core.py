@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """北云 UG016 GNSS 卫星数与状态时间线分析核心模块。
 
 所有字段口径均来自本目录 by_manual/UG016.md：
@@ -29,6 +29,9 @@ from aux_quality import parse_aux, summarize_quality, AuxData
 HASH_ANCHORS = (b"#BESTGNSSPOSA,", b"#BESTPOSA,")
 PRIMARY_SOURCE = "BESTGNSSPOSA"
 FALLBACK_SOURCE = "BESTPOSA"
+
+# 用于同一子图内多条线的鲜明颜色轮：蓝/橙/绿/红/黄/紫/棕/粉
+VIVID_COLORS = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#FFD700", "#9467bd", "#8c564b", "#e377c2"]
 
 POSITION_TYPE_DESCRIPTIONS = {
     "NONE": "未解算", "FIXEDPOS": "位置已由FIX POSITION命令固定",
@@ -123,7 +126,6 @@ class PositionSample:
     tracked: int
     used: int
     l1: int
-    multi: int
     multi: int
     source: str
     header_week: int = 0
@@ -435,21 +437,22 @@ def plot_timeline(analyses: Sequence[FileAnalysis], output_png: Path, x_mode="ab
     plt.rcParams["font.sans-serif"] = ["Microsoft YaHei", "SimHei", "Noto Sans CJK SC", "DejaVu Sans"]
     plt.rcParams["axes.unicode_minus"] = False
     origins = _origin(analyses, x_mode)
-    colors = plt.get_cmap("tab10").colors
+    colors = VIVID_COLORS
 
     fig, axes = plt.subplots(3, 1, figsize=(20, 12.5), dpi=180,
                              gridspec_kw={"height_ratios": [1.30, 1.15, 0.85], "hspace": 0.34})
     ax_sat, ax_pos, ax_sol = axes
 
     for i, a in enumerate(analyses):
-        c = colors[i % len(colors)]
+        c1 = colors[(2 * i) % len(colors)]
+        c2 = colors[(2 * i + 1) % len(colors)]
         xs = [s.t - origins[a.label] for s in a.samples]
         xt = [float(s.tracked) for s in a.samples]
         xu = [float(s.used) for s in a.samples]
         x1, y1 = _break_gaps(xs, xt, a.gap_threshold_s)
         x2, y2 = _break_gaps(xs, xu, a.gap_threshold_s)
-        ax_sat.plot(x1, y1, color=c, lw=2.5, drawstyle="steps-post", label=f"{a.label}｜#SVs")
-        ax_sat.plot(x2, y2, color=c, lw=2.1, ls="--", drawstyle="steps-post", label=f"{a.label}｜#solnSVs")
+        ax_sat.plot(x1, y1, color=c1, lw=2.5, drawstyle="steps-post", label=f"{a.label}｜#SVs")
+        ax_sat.plot(x2, y2, color=c2, lw=2.1, ls="--", drawstyle="steps-post", label=f"{a.label}｜#solnSVs")
     ax_sat.set_title("卫星数量时间线：#SVs跟踪卫星数（实线）与#solnSVs解算卫星数（虚线）", fontsize=17, pad=12)
     ax_sat.set_ylabel("卫星数（颗）", fontsize=13)
     ax_sat.grid(alpha=.28); ax_sat.tick_params(labelsize=11)
@@ -462,14 +465,14 @@ def plot_timeline(analyses: Sequence[FileAnalysis], output_png: Path, x_mode="ab
                 pos_order.append(s.pos_type)
     pos_y = {v: i + 1 for i, v in enumerate(pos_order)}
     for i, a in enumerate(analyses):
-        c = colors[i % len(colors)]
+        c = colors[(2 * i) % len(colors)]
         xs = [s.t - origins[a.label] for s in a.samples]
         ys = [pos_y[s.pos_type] for s in a.samples]
         x, y = _break_gaps(xs, ys, a.gap_threshold_s)
         ax_pos.plot(x, y, color=c, lw=2.4, drawstyle="steps-post", label=a.label)
     # 事件点放在对应定位类型的y值上。
     for i, a in enumerate(analyses):
-        c = colors[i % len(colors)]
+        c = colors[(2 * i) % len(colors)]
         pos_by_t = {s.t: s.pos_type for s in a.samples}
         for e in a.events:
             if not e.major:
@@ -493,7 +496,7 @@ def plot_timeline(analyses: Sequence[FileAnalysis], output_png: Path, x_mode="ab
                 sol_order.append(s.sol_status)
     sol_y = {v: i + 1 for i, v in enumerate(sol_order)}
     for i, a in enumerate(analyses):
-        c = colors[i % len(colors)]
+        c = colors[(2 * i) % len(colors)]
         xs = [s.t - origins[a.label] for s in a.samples]
         ys = [sol_y[s.sol_status] for s in a.samples]
         x, y = _break_gaps(xs, ys, a.gap_threshold_s)
@@ -683,12 +686,12 @@ def plot_quality_timeline(analyses, aux_data, output_png: Path, x_mode="absolute
     plt.rcParams["font.sans-serif"] = ["Microsoft YaHei","SimHei","Noto Sans CJK SC","DejaVu Sans"]
     plt.rcParams["axes.unicode_minus"] = False
     origins = _origin(analyses, x_mode)
-    colors = plt.get_cmap("tab10").colors
+    colors = VIVID_COLORS
     fig,axes=plt.subplots(5,1,figsize=(22,18),dpi=170,gridspec_kw={"height_ratios":[.85,1.15,1,1,.85],"hspace":.42})
     ax_time,ax_sat,ax_sig,ax_sigma,ax_ins=axes
 
     for i,a in enumerate(analyses):
-        c=colors[i%len(colors)]
+        c=colors[(2*i)%len(colors)]
         aux=aux_data[a.path]
         xs=[s.t-origins[a.label] for s in a.samples]
         # 时间状态：UNKNOWN=0, COARSE=1, FINESTEERING=2
@@ -701,42 +704,45 @@ def plot_quality_timeline(analyses, aux_data, output_png: Path, x_mode="absolute
     ax_time.grid(alpha=.27);ax_time.legend(fontsize=10);ax_time.tick_params(labelsize=11)
 
     for i,a in enumerate(analyses):
-        c=colors[i%len(colors)]
+        c1=colors[(2*i)%len(colors)]
+        c2=colors[(2*i+1)%len(colors)]
         xs=[s.t-origins[a.label] for s in a.samples]
         x1,y1=_break_gaps(xs,[s.tracked for s in a.samples],a.gap_threshold_s)
         x2,y2=_break_gaps(xs,[s.used for s in a.samples],a.gap_threshold_s)
-        ax_sat.plot(x1,y1,color=c,lw=2.4,drawstyle="steps-post",label=f"{a.label}｜#SVs")
-        ax_sat.plot(x2,y2,color=c,lw=2,ls="--",drawstyle="steps-post",label=f"{a.label}｜#solnSVs")
+        ax_sat.plot(x1,y1,color=c1,lw=2.4,drawstyle="steps-post",label=f"{a.label}｜#SVs")
+        ax_sat.plot(x2,y2,color=c2,lw=2,ls="--",drawstyle="steps-post",label=f"{a.label}｜#solnSVs")
     ax_sat.set_title("跟踪卫星数与参与解算卫星数（BESTGNSSPOSA字段15/16；两者差异=可见但未被采用）",fontsize=16)
     ax_sat.set_ylabel("卫星数（颗）");ax_sat.grid(alpha=.27);ax_sat.legend(fontsize=9);ax_sat.tick_params(labelsize=11)
 
     for i,a in enumerate(analyses):
-        c=colors[i%len(colors)]
+        c1=colors[(2*i+2)%len(colors)]
+        c2=colors[(2*i+3)%len(colors)]
         g=aux_data[a.path].gsv_epochs
         xs=[x.t-origins[a.label] for x in g]
         # 只画每颗卫星的信噪比散点；SNR=0/空不作为有效信号。
         for x,gp in zip(xs,g):
             vals=[s.snr_dbhz for s in gp.satellites if s.has_signal]
-            ax_sig.scatter([x]*len(vals),vals,s=7,color=c,alpha=.35,edgecolors="none")
+            ax_sig.scatter([x]*len(vals),vals,s=7,color=c1,alpha=.35,edgecolors="none")
         # 每秒批次的信号数与高信噪比数量
         counts=[gp.with_snr for gp in g]; high=[gp.above_35dbhz for gp in g]
         x1,y1=_break_gaps(xs,counts,None);x2,y2=_break_gaps(xs,high,None)
-        ax_sig.plot(x1,y1,color=c,lw=1.8,label=f"{a.label}｜GSV有SNR卫星数")
-        ax_sig.plot(x2,y2,color=c,lw=1.6,ls=":",label=f"{a.label}｜SNR≥35dB-Hz")
+        ax_sig.plot(x1,y1,color=c1,lw=1.8,label=f"{a.label}｜GSV有SNR卫星数")
+        ax_sig.plot(x2,y2,color=c2,lw=1.6,ls=":",label=f"{a.label}｜SNR≥35dB-Hz")
     ax_sig.set_title("卫星信号质量：GSV逐星信噪比、GSV可见且有SNR卫星数与高信噪比卫星数（时间=批次前最近BEST时间，顺序近似）",fontsize=16)
     ax_sig.set_ylabel("SNR（dB-Hz）/ 卫星数");ax_sig.grid(alpha=.27);ax_sig.legend(fontsize=9);ax_sig.tick_params(labelsize=11)
 
     for i,a in enumerate(analyses):
-        c=colors[i%len(colors)]
+        c1=colors[(2*i+4)%len(colors)]
+        c2=colors[(2*i+5)%len(colors)]
         q=summarize_quality(aux_data[a.path])
         xs=[x["t"]-origins[a.label] for x in q]
         hs=[x["h_sigma"] for x in q]
         xh,yh=_break_gaps(xs,hs,a.gap_threshold_s)
-        ax_sigma.plot(xh,yh,color=c,lw=2.1,label=f"{a.label}｜水平σ=max(latσ,lonσ)")
+        ax_sigma.plot(xh,yh,color=c1,lw=2.1,label=f"{a.label}｜水平σ=max(latσ,lonσ)")
         # 差分龄期
         ages=[x["diff_age"] if x["diff_age"] is not None else float("nan") for x in q]
         xa,ya=_break_gaps(xs,ages,a.gap_threshold_s)
-        ax_sigma.plot(xa,ya,color=c,lw=1.5,ls="--",alpha=.85,label=f"{a.label}｜Diff_age")
+        ax_sigma.plot(xa,ya,color=c2,lw=1.5,ls="--",alpha=.85,label=f"{a.label}｜Diff_age")
     ax_sigma.set_ylabel("m / s");ax_sigma.set_yscale("symlog",linthresh=0.05)
     ax_sigma.set_title("接收机自估计位置质量与差分龄期（σ不是实测误差；Diff_age反映差分改正新鲜度）",fontsize=16)
     ax_sigma.grid(alpha=.27);ax_sigma.legend(fontsize=9);ax_sigma.tick_params(labelsize=11)
@@ -747,7 +753,7 @@ def plot_quality_timeline(analyses, aux_data, output_png: Path, x_mode="absolute
             if s.ins_status not in ins_order:ins_order.append(s.ins_status)
     ins_y={v:i+1 for i,v in enumerate(ins_order)}
     for i,a in enumerate(analyses):
-        c=colors[i%len(colors)]
+        c=colors[(2*i)%len(colors)]
         seq=aux_data[a.path].ins
         xs=[s.t-origins[a.label] for s in seq]
         ys=[ins_y[s.ins_status] for s in seq]
@@ -928,11 +934,11 @@ def age_findings(a: FileAnalysis, summary: dict) -> list[str]:
 
 def plot_age_timeline(analyses, aux_data, output_png: Path, x_mode="absolute") -> Path:
     plt.rcParams["font.sans-serif"]=["Microsoft YaHei","SimHei","Noto Sans CJK SC","DejaVu Sans"];plt.rcParams["axes.unicode_minus"]=False
-    origins=_origin(analyses,x_mode);colors=plt.get_cmap("tab10").colors
+    origins=_origin(analyses,x_mode);colors=VIVID_COLORS
     fig,axes=plt.subplots(3,1,figsize=(20,12),dpi=180,gridspec_kw={"height_ratios":[1.2,.8,.8],"hspace":.38})
     ax_age,ax_station,ax_sol=axes
     for i,a in enumerate(analyses):
-        c=colors[i%len(colors)];rows=age_summary(a,aux_data[a.path])["rows"]
+        c=colors[(2*i)%len(colors)];rows=age_summary(a,aux_data[a.path])["rows"]
         xs=[x["t"]-origins[a.label] for x in rows]
         ys=[x["diff_age"] if x["diff_age"] is not None else float("nan") for x in rows]
         x,y=_break_gaps(xs,ys,a.gap_threshold_s)

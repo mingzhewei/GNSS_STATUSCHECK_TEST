@@ -1,0 +1,12 @@
+﻿event_id,file,event,gps_week,gps_tow_s,time_basis,major,detail
+1,gnss_raw.txt,首个非UNKNOWN时间状态：FINESTEERING,2437,379926.400,GPS标准时间,是,UG016 2.1.2.1标准ASCII头字段6；其后的UNKNOWN样本按锚点回推。
+2,gnss_raw.txt,首次SOL_COMPUTED,2437,379926.400,GPS标准时间,是,UG016表4-1：完全解算。
+3,gnss_raw.txt,首次定位类型NARROW_FLOAT,2437,379926.400,GPS标准时间,是,UG016表4-2：窄带浮点解；#SVs=24，#solnSVs=23。
+4,gnss_raw.txt,首次时间状态FINESTEERING,2437,379926.400,GPS标准时间,是,UG016 2.1.2.1标准ASCII头字段6。
+5,gnss_raw.txt,首次解算卫星数>0（#solnSVs=23）,2437,379926.400,GPS标准时间,是,UG016 4.2.2字段16 #solnSVs。
+6,gnss_raw.txt,首次定位类型NARROW_INT,2437,380142.000,GPS标准时间,是,UG016表4-2：窄带固定解；#SVs=26，#solnSVs=25。
+7,gnss_raw.txt,首次定位类型PSRDIFF,2437,380895.800,GPS标准时间,是,UG016表4-2：伪距差分；#SVs=27，#solnSVs=24。
+8,gnss_raw.txt,首次定位类型SINGLE,2437,380901.900,GPS标准时间,是,UG016表4-2：单点解；#SVs=22，#solnSVs=7。
+9,gnss_raw.txt,首次定位类型NONE,2437,380913.800,GPS标准时间,否,UG016表4-2：未解算；#SVs=27，#solnSVs=0。
+10,gnss_raw.txt,首次解算状态RESIDUALS,2437,380913.800,GPS标准时间,否,UG016表4-1：残差过大。
+11,gnss_raw.txt,首次解算状态VARIANCE,2437,380913.900,GPS标准时间,否,UG016表4-1：方差超过限值。
